@@ -1,5 +1,6 @@
 package com.gautam.hospital.service;
 
+import com.gautam.hospital.entity.Diagnosis;
 import com.gautam.hospital.entity.Patient;
 
 import java.util.List;
@@ -16,5 +17,6 @@ public interface PatientService {
     public Patient updatePatient(Long patientId, Patient patient);
 
     public Patient fetchPatientByName(String patientName);
+    public List<Diagnosis> getDiagnosesByPatientId(Long patientId);
 
 }

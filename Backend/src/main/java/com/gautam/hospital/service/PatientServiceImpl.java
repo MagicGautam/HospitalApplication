@@ -1,11 +1,13 @@
 package com.gautam.hospital.service;
 
+import com.gautam.hospital.entity.Diagnosis;
 import com.gautam.hospital.entity.Patient;
 import com.gautam.hospital.repository.DiagnosisRepository;
 import com.gautam.hospital.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +62,14 @@ public class PatientServiceImpl implements PatientService {
             patDB.setPatientNumber(patient.getPatientNumber());
         }
         return patientRepository.save(patDB);
+    }
+    @Override
+    public List<Diagnosis> getDiagnosesByPatientId(Long patientId) {
+        Patient patient = patientRepository.findById(patientId).orElse(null);
+        if (patient != null) {
+            return patient.getDiagnosisList();
+        }
+        return Collections.emptyList();
     }
 
     @Override
