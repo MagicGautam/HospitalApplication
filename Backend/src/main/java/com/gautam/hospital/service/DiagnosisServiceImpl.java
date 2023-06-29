@@ -38,8 +38,8 @@ public class DiagnosisServiceImpl implements DiagnosisService{
     }
 
     @Override
-    public void deleteDiagnosisById(Long diagnosisId) {
-        diagnosisRepository.deleteById(diagnosisId);
+    public void deleteDiagnosisByPatientId(Long patientId) {
+        diagnosisRepository.deleteById(patientId);
     }
 
     @Override

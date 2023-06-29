@@ -11,7 +11,10 @@ public interface DiagnosisService {
 
     public Diagnosis fetchDiagnosisById(Long diagnosisId);
 
-    public void deleteDiagnosisById(Long diagnosisId);
+    public default void deleteDiagnosisByPatientId(Long patientId) {
+
+    }
+
     public Diagnosis updateDiagnosis(Long diagnosisId, Diagnosis diagnosis);
 
     public Diagnosis fetchDiagnosisByName(String disease);
