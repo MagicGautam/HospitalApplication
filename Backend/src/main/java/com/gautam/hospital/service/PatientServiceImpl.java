@@ -1,5 +1,6 @@
 package com.gautam.hospital.service;
 
+import com.gautam.hospital.DTO.PatientDTO;
 import com.gautam.hospital.entity.Diagnosis;
 import com.gautam.hospital.entity.Patient;
 import com.gautam.hospital.repository.DiagnosisRepository;
@@ -70,6 +71,17 @@ public class PatientServiceImpl implements PatientService {
             return patient.getDiagnosisList();
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public PatientDTO convertToDTO(Patient patient) {
+        PatientDTO patientDTO= new PatientDTO();
+        patientDTO.setPatientId(patient.getPatientId());
+        patientDTO.setPatientName(patient.getPatientName());
+        patientDTO.setPatientAddress(patient.getPatientAddress());
+        patientDTO.setPatientNumber(patient.getPatientNumber());
+        patientDTO.setDiagnosisList(patient.getDiagnosisList());
+        return patientDTO;
     }
 
     @Override

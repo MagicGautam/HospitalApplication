@@ -1,10 +1,11 @@
 package com.gautam.hospital.controller;
 
+import com.gautam.hospital.DTO.PatientDTO;
 import com.gautam.hospital.entity.Diagnosis;
 import com.gautam.hospital.entity.Patient;
 import com.gautam.hospital.service.DiagnosisService;
-import com.gautam.hospital.service.DiagnosisServiceImpl;
 import com.gautam.hospital.service.PatientService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,34 +14,33 @@ import java.util.List;
 @RestController
     @RequestMapping("/patients")
     public class PatientController {
-        private final PatientService patientService;
-        private final DiagnosisService diagnosisService;
 
-        public PatientController(PatientService patientService, DiagnosisService diagnosisService) {
-            this.patientService = patientService;
-            this.diagnosisService = diagnosisService;
-        }
+    @Autowired
+    private PatientService patientService;
+
+    @Autowired
+    private DiagnosisService diagnosisService;
     @PostMapping
-    public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
+    public ResponseEntity<PatientDTO> createPatient(@RequestBody Patient patient) {
         // Save the Patient entity in the database
         Patient createdPatient = patientService.savePatient(patient);
 
-        // Process the diagnosisList
         List<Diagnosis> diagnosisList = patient.getDiagnosisList();
-        if (diagnosisList != null && !diagnosisList.isEmpty()) {
-            // Iterate over the diagnosisList and create/update Diagnosis entities
-            for (Diagnosis diagnosis : diagnosisList) {
-                // Set the patient attribute of the Diagnosis entity
-                diagnosis.setPatient(createdPatient);
-
-                // Save the Diagnosis entity in the database
-                diagnosisService.saveDiagnosis(diagnosis);
-            }
+        for (Diagnosis diagnosis : diagnosisList) {
+            diagnosis.setPatient(createdPatient);
+            diagnosisService.saveDiagnosis(diagnosis);
         }
+        // Create the PatientResponse object and set the properties
+        PatientDTO patientDTO = PatientDTO.builder()
+                .patientId(createdPatient.getPatientId())
+                .patientName(createdPatient.getPatientName())
+                .patientAddress(createdPatient.getPatientAddress())
+                .patientNumber(createdPatient.getPatientNumber())
+                .diagnosisList(createdPatient.getDiagnosisList())
+                .build();
 
-        return ResponseEntity.ok(createdPatient);
+        return ResponseEntity.ok(patientDTO);
     }
-
     @DeleteMapping("/{patientId}")
     public ResponseEntity<Void> deletePatient(@PathVariable long patientId) {
         // Delete the Patient entity from the database
@@ -50,11 +50,10 @@ import java.util.List;
     }
 
     @GetMapping("/{patientId}")
-    public ResponseEntity<Patient> getPatient(@PathVariable long patientId) {
-        // Retrieve the Patient entity from the database
+    public ResponseEntity<PatientDTO> getPatient(@PathVariable long patientId) {
         Patient patient = patientService.fetchPatientById(patientId);
-
-        return ResponseEntity.ok(patient);
+        PatientDTO patientDTO = patientService.convertToDTO(patient);
+        return ResponseEntity.ok(patientDTO);
     }
 
     @GetMapping
@@ -65,35 +64,38 @@ import java.util.List;
         return ResponseEntity.ok(patients);
     }
 
-        @PutMapping("/{patientId}")
-        public ResponseEntity<Patient> updatePatient(@PathVariable long patientId, @RequestBody Patient patient) {
-            // Map the Patient JSON object to the Patient entity
-            Patient existingPatient = patientService.fetchPatientById(patientId);
-            existingPatient.setPatientName(patient.getPatientName());
-            existingPatient.setPatientAddress(patient.getPatientAddress());
-            existingPatient.setPatientNumber(patient.getPatientNumber());
+    @PutMapping("/{patientId}")
+    public ResponseEntity<Patient> updatePatient(@PathVariable long patientId, @RequestBody Patient updatedPatient) {
+        Patient existingPatient = patientService.fetchPatientById(patientId);
+        existingPatient.setPatientName(updatedPatient.getPatientName());
+        existingPatient.setPatientAddress(updatedPatient.getPatientAddress());
+        existingPatient.setPatientNumber(updatedPatient.getPatientNumber());
 
-            // Update the Patient entity in the database
-            Patient updatedPatient = patientService.savePatient(existingPatient);
+        List<Diagnosis> updatedDiagnosisList = updatedPatient.getDiagnosisList();
+        if (updatedDiagnosisList != null) {
+            // Clear the existing diagnosis list for the patient
+            existingPatient.getDiagnosisList().clear();
 
-            // Process the diagnosisList
-            List<Diagnosis> diagnosisList = patient.getDiagnosisList();
-            if (diagnosisList != null && !diagnosisList.isEmpty()) {
-                // Clear the existing diagnosisList for the patient
-                existingPatient.getDiagnosisList().clear();
+            diagnosisService.deleteDiagnosisByPatientId(patientId);
+            // Iterate over the updated diagnosis list and create/update Diagnosis entities
+            for (Diagnosis updatedDiagnosis : updatedDiagnosisList) {
+                Diagnosis diagnosis = new Diagnosis();
+                diagnosis.setDescription(updatedDiagnosis.getDescription());
+                diagnosis.setDisease(updatedDiagnosis.getDisease());
+                diagnosis.setPatient(existingPatient);
 
-                // Iterate over the diagnosisList and create/update Diagnosis entities
-                for (Diagnosis diagnosis : diagnosisList) {
-                    // Set the patient attribute of the Diagnosis entity
-                    diagnosis.setPatient(existingPatient);
-
-                    // Save the Diagnosis entity in the database
-                    diagnosisService.saveDiagnosis(diagnosis);
-                }
+                // Save the Diagnosis entity in the database
+                diagnosisService.saveDiagnosis(diagnosis);
             }
 
-            return ResponseEntity.ok(updatedPatient);
+            // Delete the older diagnosis entries from the database
         }
+
+        // Update the Patient entity in the database
+        Patient savedPatient = patientService.savePatient(existingPatient);
+
+        return ResponseEntity.ok(savedPatient);
+    }
 
         // Other endpoints for retrieving, deleting patients, etc.
     }
