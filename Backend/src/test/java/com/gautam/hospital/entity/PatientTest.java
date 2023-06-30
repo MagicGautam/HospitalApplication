@@ -19,8 +19,6 @@ class PatientTest {
     public void getdiagnosislisttest(){
         Patient patient=new Patient();
         List<Diagnosis> diagnosisList = new ArrayList<>();
-        diagnosisList.add(new Diagnosis("Tooth Ache", "Tooth"));
-        diagnosisList.add(new Diagnosis("Myopia", "Eye"));
 
         // Set the diagnosisList of the patient
         patient.setDiagnosisList(diagnosisList);

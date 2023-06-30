@@ -1,13 +1,8 @@
 package com.gautam.hospital.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,4 +24,6 @@ public class Patient {
     @JsonManagedReference
     private List<Diagnosis> diagnosisList= new ArrayList<>();
 
+    public Patient(String patientName, String patientAddress, long patientNumber) {
+    }
 }

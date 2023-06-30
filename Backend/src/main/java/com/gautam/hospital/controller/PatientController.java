@@ -88,10 +88,7 @@ import java.util.List;
                 diagnosisService.saveDiagnosis(diagnosis);
             }
 
-            // Delete the older diagnosis entries from the database
         }
-
-        // Update the Patient entity in the database
         Patient savedPatient = patientService.savePatient(existingPatient);
 
         return ResponseEntity.ok(savedPatient);
