@@ -56,7 +56,14 @@ import java.util.List;
         return ResponseEntity.ok(patientDTO);
     }
 
-    @GetMapping
+    @GetMapping("/patient/{patientName}")
+    public ResponseEntity<PatientDTO> getPatientByName(@PathVariable String patientName) {
+        Patient patient = patientService.fetchPatientByName(patientName);
+        PatientDTO patientDTO = patientService.convertToDTO(patient);
+        return ResponseEntity.ok(patientDTO);
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<Patient>> getAllPatients() {
         // Retrieve all the Patient entities from the database
         List<Patient> patients = patientService.fetchPatientList();
